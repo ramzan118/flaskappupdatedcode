@@ -1,0 +1,5 @@
+2024-12-10 10:10:56,244 - main - ERROR - Database error: (1045, "Access denied for user 'root'@'localhost' (using password: YES)")
+2024-12-10 10:12:15,613 - main - ERROR - Database error: (1045, "Access denied for user 'root'@'localhost' (using password: YES)")
+2024-12-10 10:12:18,538 - main - ERROR - Database error: (1045, "Access denied for user 'root'@'localhost' (using password: YES)")
+2024-12-10 10:13:33,118 - main - ERROR - Database error: (1045, "Access denied for user 'root'@'localhost' (using password: YES)")
+2024-12-10 10:15:58,259 - main - ERROR - Database error: (1045, "Access denied for user 'root'@'localhost' (using password: YES)")

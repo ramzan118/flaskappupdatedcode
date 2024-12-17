@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - DevOps Blog</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #00698f;
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            font-size: 40px;
+            margin: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        h2 {
+            font-size: 32px;
+            color: #00698f;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #00698f;
+            padding-bottom: 5px;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        .form-group button {
+            padding: 1rem 2rem;
+            background-color: #00698f;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .form-group button:hover {
+            background-color: #004b63;
+        }
+        .form-group button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+        .form-group .error {
+            color: red;
+            font-size: 0.9rem;
+            display: none;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 50px;
+        }
+        footer p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Contact Us</h1>
+    </header>
+    
+    <div class="container">
+        <h2>Get in Touch</h2>
+        <p>If you have any questions, feedback, or would like to work with us, please fill out the form below:</p>
+
+        <form action="/contact" method="POST" id="contact-form">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required placeholder="Enter your name">
+                <div class="error" id="name-error">Please enter your full name.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email address">
+                <div class="error" id="email-error">Please enter a valid email address.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" required placeholder="Enter your phone number">
+                <div class="error" id="phone-error">Please enter your phone number.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <input type="text" id="subject" name="subject" required placeholder="Enter subject of your message">
+                <div class="error" id="subject-error">Please enter a subject.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required placeholder="Enter your message"></textarea>
+                <div class="error" id="message-error">Please enter a message.</div>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit">Send Message</button>
+            </div>
+        </form>
+    </div>
+    
+    <footer>
+        <p>Copyright © DevOps Blog 2024</p>
+    </footer>
+
+    <script>
+        // Simple form validation
+        const form = document.getElementById("contact-form");
+        form.addEventListener("submit", function(event) {
+            let isValid = true;
+
+            // Name validation
+            const name = document.getElementById("name");
+            if (name.value.trim() === "") {
+                document.getElementById("name-error").style.display = "block";
+                isValid = false;
+            } else {
+                document.getElementById("name-error").style.display = "none";
+            }
+
+            // Email validation
+            const email = document.getElementById("email");
+            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+            if (!emailPattern.test(email.value)) {
+                document.getElementById("email-error").style.display = "block";
+                isValid = false;
+            } else {
+                document.getElementById("email-error").style.display = "none";
+            }
+
+            // Subject validation
+            const subject = document.getElementById("subject");
+            if (subject.value.trim() === "") {
+                document.getElementById("subject-error").style.display = "block";
+                isValid = false;
+            } else {
+                document.getElementById("subject-error").style.display = "none";
+            }
+
+            // Message validation
+            const message = document.getElementById("message");
+            if (message.value.trim() === "") {
+                document.getElementById("message-error").style.display = "block";
+                isValid = false;
+            } else {
+                document.getElementById("message-error").style.display = "none";
+            }
+
+            // Prevent form submission if any field is invalid
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>
