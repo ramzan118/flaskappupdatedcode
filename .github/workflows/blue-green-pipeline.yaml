@@ -1,0 +1,54 @@
+name: Blue-Green Deployment for KIND
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Kubernetes (KIND)
+      run: |
+        # Install KIND and kubectl
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/kind
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/kubectl
+
+        # Use existing KIND cluster (local only)
+        kind get clusters || kind create cluster
+
+    - name: Build Docker Image
+      run: |
+        docker build -t my-app:latest .
+
+    - name: Load Docker Image to KIND Cluster
+      run: |
+        kind load docker-image my-app:latest
+
+    - name: Deploy to Blue Environment
+      run: |
+        kubectl apply -f k8s/blue-deployment.yaml
+        kubectl rollout status deployment/blue-app
+
+    - name: Test Blue Deployment
+      run: |
+        curl http://localhost:30081/health || exit 1
+
+    - name: Deploy to Green Environment (if Blue is Healthy)
+      if: success()
+      run: |
+        kubectl apply -f k8s/green-deployment.yaml
+        kubectl rollout status deployment/green-app
+
+    - name: Switch Traffic to Green
+      run: |
+        kubectl patch svc my-app-service --patch '{"spec":{"selector":{"app":"green-app"}}}'
