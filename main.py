@@ -33,7 +33,9 @@ def submit():
         message = request.form['message']
 
         # Log the received form data
-        app.logger.info(f"Received form data: name={name}, email={email}, phone={phone}, subject={subject}, message={message}")
+        app.logger.info(
+            f"Received form data: name={name}, email={email}, phone={phone}, subject={subject}, message={message}"
+        )
 
         # Insert data into MongoDB
         collection.insert_one({
@@ -66,7 +68,7 @@ def check_db():
 def test_mongo_connection():
     try:
         # Insert a test document into the MongoDB collection
-        data = {'name': 'Test User', 'email': 'test@example.com'}
+        data = {'name': 'Test User', 'email': 'mramzan.workmail@gmail.com'}
         collection.insert_one(data)
         return 'Test document inserted successfully!'
     except Exception as e:
@@ -116,8 +118,10 @@ def contact():
 
         # Insert data into the MySQL database
         cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO contacts (name, email, phone, subject, message) VALUES (%s, %s, %s, %s, %s)",
-                       (name, email, phone, subject, message))
+        cursor.execute(
+            "INSERT INTO contacts (name, email, phone, subject, message) VALUES (%s, %s, %s, %s, %s)",
+            (name, email, phone, subject, message)
+        )
         mysql.connection.commit()
         cursor.close()
 
