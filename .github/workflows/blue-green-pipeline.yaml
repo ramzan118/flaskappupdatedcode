@@ -38,8 +38,11 @@ jobs:
         with:
           version: 'latest'
 
+      - name: Pull Docker image
+        run: docker pull muhammad679/flask-app:latest
+
       - name: Load Docker image into kind cluster
-        run: kind load docker-image flask-app:latest --name kind-kind
+        run: kind load docker-image muhammad679/flask-app:latest --name kind-kind
 
       - name: Deploy to Blue namespace
         run: |
