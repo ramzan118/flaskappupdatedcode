@@ -1,4 +1,4 @@
-name: Blue-Green Deployment for KIND
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,49 +6,85 @@ on:
       - master
 
 jobs:
-  build-and-deploy:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Kubernetes (KIND)
-      run: |
-        # Install KIND and kubectl
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/latest/kind-linux-amd64
-        chmod +x ./kind
-        sudo mv ./kind /usr/local/bin/kind
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-        chmod +x kubectl
-        sudo mv kubectl /usr/local/bin/kubectl
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
 
-        # Use existing KIND cluster (local only)
-        kind get clusters || kind create cluster
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
 
-    - name: Build Docker Image
-      run: |
-        docker build -t my-app:latest .
+      - name: Lint code
+        run: flake8 .
 
-    - name: Load Docker Image to KIND Cluster
-      run: |
-        kind load docker-image my-app:latest
+  sonarQube:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Deploy to Blue Environment
-      run: |
-        kubectl apply -f k8s/blue-deployment.yaml
-        kubectl rollout status deployment/blue-app
+      - name: Set up SonarQube
+        uses: sonarsource/sonarqube-scan-action@v1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-    - name: Test Blue Deployment
-      run: |
-        curl http://localhost:30081/health || exit 1
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Deploy to Green Environment (if Blue is Healthy)
-      if: success()
-      run: |
-        kubectl apply -f k8s/green-deployment.yaml
-        kubectl rollout status deployment/green-app
+      - name: Build Docker image
+        run: docker build -t flask-app:latest .
 
-    - name: Switch Traffic to Green
-      run: |
-        kubectl patch svc my-app-service --patch '{"spec":{"selector":{"app":"green-app"}}}'
+      - name: Push Docker image
+        run: |
+          docker tag flask-app:latest muhammad679/flask-app:latest
+          docker push muhammad679/flask-app:latest
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
+
+      - name: Load Docker image into kind cluster
+        run: kind load docker-image flask-app:latest --name kind-kind
+
+      - name: Deploy to Blue namespace
+        run: |
+          kubectl apply -f k8s/blue/
+          kubectl rollout status deployment/flask-app -n blue
+
+      - name: Health check Blue
+        run: |
+          kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.blue.svc.cluster.local/health || exit 1
+
+      - name: Deploy to Green namespace
+        run: |
+          kubectl apply -f k8s/green/
+          kubectl rollout status deployment/flask-app -n green
+
+      - name: Health check Green
+        run: |
+          kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.green.svc.cluster.local/health || exit 1
+
+      - name: Switch traffic to Green
+        run: kubectl apply -f k8s/switch-to-green.yaml
