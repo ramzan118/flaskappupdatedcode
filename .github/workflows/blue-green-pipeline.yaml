@@ -42,7 +42,7 @@ jobs:
         run: docker pull muhammad679/flask-app:latest
 
       - name: Switch to correct context
-        run: kubectl config use-context kind-kind
+        run: kubectl config use-context admin-context
 
       - name: Load Docker image into kind cluster
         run: kind load docker-image muhammad679/flask-app:latest
