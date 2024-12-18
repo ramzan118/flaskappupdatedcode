@@ -1,4 +1,4 @@
-####cicd
+###cicd#####
 name: CI/CD Pipeline
 
 on:
@@ -74,7 +74,8 @@ jobs:
 
       - name: Deploy to Blue namespace
         run: |
-          kubectl apply -f k8s/blue/
+          kubectl apply -f blue-deployment.yaml
+          kubectl apply -f blue-service.yaml
           kubectl rollout status deployment/flask-app -n blue
 
       - name: Health check Blue
@@ -83,7 +84,8 @@ jobs:
 
       - name: Deploy to Green namespace
         run: |
-          kubectl apply -f k8s/green/
+          kubectl apply -f green-deployment.yaml
+          kubectl apply -f green-service.yaml
           kubectl rollout status deployment/flask-app -n green
 
       - name: Health check Green
@@ -91,4 +93,4 @@ jobs:
           kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.green.svc.cluster.local/health || exit 1
 
       - name: Switch traffic to Green
-        run: kubectl apply -f k8s/switch-to-green.yaml
+        run: kubectl apply -f switch-to-green.yaml
