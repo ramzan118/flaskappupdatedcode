@@ -1,4 +1,3 @@
-###
 import logging
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from flask_mysqldb import MySQL
@@ -49,6 +48,7 @@ def submit():
         app.logger.error(f"Error inserting data into MongoDB: {e}")
     return redirect(url_for('index'))
 
+
 # MySQL DB connectivity check
 @app.route('/check_db')
 def check_db():
@@ -59,6 +59,7 @@ def check_db():
         return f"Connected to database: {db_name[0]}"
     except Exception as e:
         return str(e)
+
 
 # MongoDB connectivity check
 @app.route('/test-mongo-connection')
@@ -71,6 +72,7 @@ def test_mongo_connection():
     except Exception as e:
         return str(e)
 
+
 # Configure logging to a file
 file_handler = logging.FileHandler('app.log')  # Specify log file
 file_handler.setLevel(logging.DEBUG)  # Set the desired logging level
@@ -78,20 +80,24 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 file_handler.setFormatter(formatter)
 app.logger.addHandler(file_handler)
 
+
 @app.route('/')
 def index():
     app.logger.info("Index page accessed")
     return render_template('index.html')
+
 
 @app.route('/about')
 def about():
     app.logger.info("About page accessed")
     return render_template('about.html')
 
+
 @app.route('/services')
 def services():
     app.logger.info("Services page accessed")
     return render_template('services.html')
+
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -110,7 +116,7 @@ def contact():
 
         # Insert data into the MySQL database
         cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO contacts (name, email, phone, subject, message) VALUES (%s, %s, %s, %s, %s)", 
+        cursor.execute("INSERT INTO contacts (name, email, phone, subject, message) VALUES (%s, %s, %s, %s, %s)",
                        (name, email, phone, subject, message))
         mysql.connection.commit()
         cursor.close()
@@ -118,6 +124,7 @@ def contact():
         return jsonify({"message": "Success", "phone": phone}), 200
     else:
         return render_template('contact.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
