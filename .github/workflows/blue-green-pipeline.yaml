@@ -3,7 +3,7 @@ name: Blue-Green Deployment for KIND
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-deploy:
