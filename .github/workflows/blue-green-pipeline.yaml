@@ -1,4 +1,3 @@
-######
 name: CI/CD Pipeline
 
 on:
@@ -40,7 +39,7 @@ jobs:
           version: 'latest'
 
       - name: Load Docker image into kind cluster
-        run: kind load docker-image flask-app:latest --name kind --verbose
+        run: kind load docker-image flask-app:latest --name kind --loglevel debug
 
       - name: Deploy to Blue namespace
         run: |
@@ -50,17 +49,4 @@ jobs:
 
       - name: Health check Blue
         run: |
-          kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.blue.svc.cluster.local/health || exit 1
-
-      - name: Deploy to Green namespace
-        run: |
-          kubectl apply -f green-deployment.yaml
-          kubectl apply -f green-service.yaml
-          kubectl rollout status deployment/flask-app -n green
-
-      - name: Health check Green
-        run: |
-          kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.green.svc.cluster.local/health || exit 1
-
-      - name: Switch traffic to Green
-        run: kubectl apply -f switch-to-green.yaml
+          kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.blue.s
