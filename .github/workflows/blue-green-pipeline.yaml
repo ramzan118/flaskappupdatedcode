@@ -69,7 +69,7 @@ jobs:
           version: 'latest'
 
       - name: Load Docker image into kind cluster
-        run: kind load docker-image flask-app:latest --name kind-kind
+        run: kind load docker-image flask-app:latest --name kind
 
       - name: Deploy to Blue namespace
         run: |
