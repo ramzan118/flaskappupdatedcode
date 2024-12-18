@@ -22,6 +22,7 @@ try:
 except Exception as e:
     print(f"Error connecting to MongoDB: {e}")
 
+
 # MongoDB form submission
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -68,7 +69,7 @@ def check_db():
 def test_mongo_connection():
     try:
         # Insert a test document into the MongoDB collection
-        data = {'name': 'Test User', 'email': 'mramzan.workmail@gmail.com'}
+        data = {'name': 'Test User', 'email': 'test@example.com'}
         collection.insert_one(data)
         return 'Test document inserted successfully!'
     except Exception as e:
