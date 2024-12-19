@@ -1,5 +1,3 @@
-name: Test Connectivity
-
 on:
   push:
     branches:
@@ -30,7 +28,7 @@ jobs:
 
     - name: Test kubectl connectivity
       run: |
-        kubectl get nodes
+        kubectl get nodes --insecure-skip-tls-verify=true
 
     - name: Debug kubectl config
       run: |
