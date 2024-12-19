@@ -3,7 +3,7 @@ name: Test Connectivity
 on:
   push:
     branches:
-      - main
+      - flasklocal
   pull_request:
     branches:
       - main
@@ -23,7 +23,7 @@ jobs:
 
     - name: Configure kubectl
       run: |
-        kubectl config set-cluster kind-kind --server=https://6f03-58-65-202-78.ngrok-free.app --insecure-skip-tls-verify=true
+        kubectl config set-cluster kind-kind --server=https://0578-58-65-202-78.ngrok-free.app --insecure-skip-tls-verify=true
         kubectl config set-credentials github-actions --token=${{ secrets.KUBE_TOKEN }}
         kubectl config set-context kind-kind --cluster=kind-kind --user=github-actions
         kubectl config use-context kind-kind
@@ -39,4 +39,4 @@ jobs:
 
     - name: Check API server health
       run: |
-        curl -k https://6f03-58-65-202-78.ngrok-free.app/healthz
+        curl -k https://0578-58-65-202-78.ngrok-free.app/healthz
