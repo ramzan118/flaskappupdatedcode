@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Test Connectivity
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  test-connectivity:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,12 +27,6 @@ jobs:
         kubectl config set-context kind-kind --cluster=kind-kind
         kubectl config use-context kind-kind
 
-    - name: Deploy to Kubernetes
+    - name: Test kubectl connectivity
       run: |
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
-
-    - name: Run tests
-      run: |
-        kubectl wait --for=condition=available --timeout=600s deployment/my-app
-        kubectl run test-runner --image=my-app:test --restart=Never -- my-test-command
+        kubectl get nodes
