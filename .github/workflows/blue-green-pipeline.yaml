@@ -1,58 +1,39 @@
-deploy:
-  runs-on: ubuntu-latest
-  needs: build
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+name: Connectivity Test
 
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v1
-      with:
-        version: 'latest'
+on:
+  push:
+    branches:
+      - main
 
-    - name: Set up kubeconfig
-      run: |
-        mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-      env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+jobs:
+  test-connectivity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set KUBECONFIG
-      run: export KUBECONFIG=~/.kube/config
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v1
+        with:
+          version: 'latest'
 
-    - name: Debug kubeconfig
-      run: |
-        kubectl config get-contexts
-        cat ~/.kube/config
+      - name: Set up kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
 
-    - name: Pull Docker image
-      run: docker pull muhammad679/flask-app:latest
+      - name: Set KUBECONFIG
+        run: export KUBECONFIG=~/.kube/config
 
-    - name: Switch to correct context
-      run: kubectl config use-context kind-kind
+      - name: Debug kubeconfig
+        run: |
+          kubectl config get-contexts
+          cat ~/.kube/config
 
-    - name: Load Docker image into kind cluster
-      run: kind load docker-image muhammad679/flask-app:latest
+      - name: Switch to correct context
+        run: kubectl config use-context kind-kind
 
-    - name: Deploy to Blue namespace
-      run: |
-        kubectl apply -f blue-deployment.yaml
-        kubectl apply -f blue-service.yaml
-        kubectl rollout status deployment/flask-app -n blue
-
-    - name: Health check Blue
-      run: |
-        kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.blue.svc.cluster.local/health || exit 1
-
-    - name: Deploy to Green namespace
-      run: |
-        kubectl apply -f green-deployment.yaml
-        kubectl apply -f green-service.yaml
-        kubectl rollout status deployment/flask-app -n green
-
-    - name: Health check Green
-      run: |
-        kubectl run health-check --rm -i --tty --image=appropriate/curl -- curl -f http://flask-app.green.svc.cluster.local/health || exit 1
-
-    - name: Switch traffic to Green
-      run: kubectl apply -f switch-to-green.yaml
+      - name: Verify cluster nodes
+        run: kubectl get nodes
