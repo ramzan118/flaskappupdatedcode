@@ -33,25 +33,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install prerequisites
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64
+          chmod +x ./kind
+          sudo mv ./kind /usr/local/bin/kind
+
+      - name: Create KIND Cluster
+        run: kind create cluster --name kind
+
+      - name: Load Docker image into KIND cluster
+        run: kind load docker-image muhammad679/flask-app:latest --name kind
+
       - name: Set up kubectl
         uses: azure/setup-kubectl@v1
         with:
           version: 'latest'
-
-      - name: Pull Docker image
-        run: docker pull muhammad679/flask-app:latest
-
-      - name: Reset kubeconfig
-        run: kubectl config unset contexts
-
-      - name: Set context
-        run: kubectl config set-context k8s --cluster=kind-control-plane
-
-      - name: Switch to correct context
-        run: kubectl config use-context k8s --v=5
-
-      - name: Load Docker image into kind cluster
-        run: kind load docker-image muhammad679/flask-app:latest
 
       - name: Deploy to Blue namespace
         run: |
@@ -75,3 +74,7 @@ jobs:
 
       - name: Switch traffic to Green
         run: kubectl apply -f switch-to-green.yaml
+
+      - name: Delete KIND Cluster
+        if: always()
+        run: kind delete cluster --name kind
