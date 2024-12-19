@@ -41,8 +41,20 @@ jobs:
           chmod +x ./kind
           sudo mv ./kind /usr/local/bin/kind
 
-      - name: Create KIND Cluster
-        run: kind create cluster --name kind
+      - name: Create KIND Cluster with custom configuration
+        run: |
+          cat <<EOF > kind-config.yaml
+          apiVersion: kind.x-k8s.io/v1alpha4
+          kind: Cluster
+          nodes:
+            - role: control-plane
+              image: kindest/node:v1.32.0
+            - role: worker
+              image: kindest/node:v1.32.0
+            - role: worker
+              image: kindest/node:v1.32.0
+          EOF
+          kind create cluster --name kind --config kind-config.yaml
 
       - name: Load Docker image into KIND cluster
         run: kind load docker-image muhammad679/flask-app:latest --name kind
