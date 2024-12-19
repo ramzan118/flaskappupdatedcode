@@ -23,10 +23,16 @@ jobs:
 
     - name: Configure kubectl
       run: |
-        kubectl config set-cluster kind-kind --server=https://8363-58-65-202-78.ngrok-free.app --insecure-skip-tls-verify=true
-        kubectl config set-context kind-kind --cluster=kind-kind
+        kubectl config set-cluster kind-kind --server=https://6f03-58-65-202-78.ngrok-free.app --insecure-skip-tls-verify=true
+        kubectl config set-credentials github-actions --token=${{ secrets.KUBE_TOKEN }}
+        kubectl config set-context kind-kind --cluster=kind-kind --user=github-actions
         kubectl config use-context kind-kind
 
     - name: Test kubectl connectivity
       run: |
         kubectl get nodes
+
+    - name: Debug kubectl config
+      run: |
+        kubectl config view
+        kubectl config current-context
