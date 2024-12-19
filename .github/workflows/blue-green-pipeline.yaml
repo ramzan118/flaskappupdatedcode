@@ -1,39 +1,38 @@
-name: Connectivity Test
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  test-connectivity:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v1
-        with:
-          version: 'latest'
+    - name: Set up Kubernetes
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
 
-      - name: Set up kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
-        env:
-          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+    - name: Configure kubectl
+      run: |
+        kubectl config set-cluster kind-kind --server=https://8363-58-65-202-78.ngrok-free.app --insecure-skip-tls-verify=true
+        kubectl config set-context kind-kind --cluster=kind-kind
+        kubectl config use-context kind-kind
 
-      - name: Set KUBECONFIG
-        run: export KUBECONFIG=~/.kube/config
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
 
-      - name: Debug kubeconfig
-        run: |
-          kubectl config get-contexts
-          cat ~/.kube/config
-
-      - name: Switch to correct context
-        run: kubectl config use-context kind-kind
-
-      - name: Verify cluster nodes
-        run: kubectl get nodes
+    - name: Run tests
+      run: |
+        kubectl wait --for=condition=available --timeout=600s deployment/my-app
+        kubectl run test-runner --image=my-app:test --restart=Never -- my-test-command
