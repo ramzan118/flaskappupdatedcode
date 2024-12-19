@@ -36,3 +36,7 @@ jobs:
       run: |
         kubectl config view
         kubectl config current-context
+
+    - name: Check API server health
+      run: |
+        curl -k https://6f03-58-65-202-78.ngrok-free.app/healthz
