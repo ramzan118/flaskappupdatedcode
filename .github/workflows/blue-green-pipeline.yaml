@@ -28,7 +28,7 @@ jobs:
 
     - name: Test kubectl connectivity
       run: |
-        kubectl get nodes --insecure-skip-tls-verify=true --request-timeout=30s
+        kubectl get nodes --insecure-skip-tls-verify=true --request-timeout=30s --v=5
 
     - name: Debug kubectl config
       run: |
